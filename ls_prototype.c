@@ -1,3 +1,21 @@
+
+
+
+
+
+
+
+
+
+
+
+
+/*Created By Alex Trew on 13/11/2018
+
+compile using gcc as >gcc -W -Wall ls_prototype -o ls_prototype -lm
+
+*/
+
 #include "stdio.h"
 #include "math.h"
 #include "stdbool.h"
@@ -105,7 +123,7 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 int 
 fileOut(char* name)
 {
-	
+	strtok(name, "\n");
 	strcat(name,".txt");
 	f = fopen(name, "w");
 	return 0;
@@ -122,7 +140,7 @@ quit(char* str)
 		{
 			printf("quitting...");
 			printf("cheerio\n\n\n");
-			fclose(f);
+			if(f!=NULL)fclose(f);
 			return 1;
 			
 		}
@@ -136,7 +154,7 @@ int
 main()
 {
 
-	bool idiot = true;
+	bool prog = true;
 	char scale_in[16];
 	char _5ht_in[16];
 	char sf_in[16];
@@ -145,19 +163,24 @@ main()
 	char fname_in[256];
 
 
-
+	bool first = true;
 
 	printf("Welcome to Alex's mPFC activity measurement prototype! Type \"quit\" to quit.\n\n");	
 	
+
 	while(true)
 	{
 
+		if(first)
+		{
 
-		printf("Enter a name for the output file\n\n>");
-		fgets(fname_in,256,stdin);
-		if(quit(fname_in)==1)return 0;
+			printf("Enter a name for the output file\n\n>");
+			fgets(fname_in,256,stdin);
+			if(quit(fname_in)==1)return 0;
 
-		fileOut(fname_in);
+			fileOut(fname_in);
+			first=false;
+		}
 
 		printf("Enter the size of the movement scale\n\n>");
 		fgets(scale_in,256,stdin);
@@ -171,7 +194,7 @@ main()
 
 		if(quit(_5ht_in)==1)return 0;
 
-		while(idiot)
+		while(prog)
 		{
 
 			printf("Enter a speed scaling factor (Must be a factor/multiple of 10 and > 0)\n\n>");
@@ -179,21 +202,14 @@ main()
 			fgets(sf_in, 256, stdin);
 			if(quit(sf_in)==1)return 0;
 			
-			if(atof(sf_in) != 1 && fmod(atof(sf_in), 10) != 0)
+			if((atof(sf_in) != 1 && fmod(atof(sf_in), 10) != 0)|| atof(sf_in)==0 || atof(sf_in)<0)
 			{
-				printf("\nThat's not a factor/multiple of 10.\n\n");
+				printf("\nInvalid input.\n\n");
 			}
-			else if(atof(sf_in)==0)
-			{
-				printf("\nThat is 0.\n\n");
-			}
-			else if(atof(sf_in)<0)
-			{
-				printf("\nThat is less than 0.\n\n");
-			}
+			
 			else
 			{
-				idiot = false;
+				prog = false;
 			}
 
 			
@@ -216,8 +232,7 @@ main()
 
 
 
-		
-//run(int sf, float scale, float _5ht, int r_delay ,int r_life)		
+
 
 		
 		
