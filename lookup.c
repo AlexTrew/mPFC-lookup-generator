@@ -14,7 +14,7 @@ lookup(double _5ht,double max5ht, bool nutt)
 
 {
 	if(!nutt) return (1-exp(-pow(max5ht/_5ht,_5ht)))*_5ht; //nutt version with 5ht offset;
-    return (1-exp(-pow(max5ht/_5ht,_5ht)))*_5ht+1; //standard version with no 5ht offset;
+    return (1-exp(-pow(max5ht/_5ht,_5ht)))*(_5ht+1); //standard version with no 5ht offset;
 
 }
 
@@ -22,30 +22,19 @@ int
 tabulate(double inc, double max5ht)
 {
     printf("Standard ls model: \n\n");
-	printf("\n\n\n   5ht		|	x	|	output\n________________________________________________\n");
+	printf("\n\n\n   5ht	|	x	| standard output   | nutt output\n_________________________________________________________\n");
 	for(double _5ht=0;_5ht<=max5ht;_5ht+=inc)
 	{
 
 		for(int x=0;x<=3;x++)
 		{		
-			printf("%.1lf	|	%d	|	%lf\n",_5ht,x,lookup(_5ht,x, false));
+			printf("%.1lf	|	%d	|	%lf    |  %lf  \n",_5ht,x,lookup(_5ht,x, false), lookup(_5ht,x, true));
 		}
 		
 	}
 	printf("\n\n\n");
     
-    printf("Nutt ls model: \n\n");
-	printf("\n\n\n   5ht		|	x	|	output\n________________________________________________\n");
-	for(double _5ht=0;_5ht<=max5ht;_5ht+=inc)
-	{
-
-		for(int x=0;x<=3;x++)
-		{		
-			printf("%.1lf	|	%d	|	%lf\n",_5ht,x,lookup(_5ht,x,true));
-		}
-		
-	}
-	printf("\n\n\n");
+    
 	return 0;
 }
 
