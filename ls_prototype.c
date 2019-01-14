@@ -34,9 +34,14 @@ FILE* f;
 
 
 double 
-lookup(double _5ht,double max5ht)
+lookup(double _5ht,double max5ht, bool nutt)
 {
-	return (1-exp(-pow(max5ht/_5ht,_5ht)))*_5ht;
+    if(!nutt)
+    {
+     return (1-exp(-pow(max5ht/_5ht,_5ht)))*_5ht;   
+    }
+    
+     return (1-exp(-pow(max5ht/_5ht,_5ht)))*(_5ht+1);
 
 }
 
@@ -66,7 +71,7 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 		if(pos<=scale)
 		{
 
-			speed = lookup(_5ht, x);
+			speed = lookup(_5ht, x, false);
 			
 			speed_out = sf*speed;
 			pos+=(speed_out);
