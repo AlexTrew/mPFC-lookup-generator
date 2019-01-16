@@ -192,56 +192,42 @@ main()
 	//{
 
 
-		printf("Enter 5ht value or \"quit\" to quit\n\n>");
-        fgets(_5ht_in,256,stdin);
-        if(quit(_5ht_in)==1)return 0;
+    printf("Enter 5ht value or \"quit\" to quit\n\n>");
+    fgets(_5ht_in,256,stdin);
+    if(quit(_5ht_in)==1)return 0;
         
-         _5ht = atof(_5ht_in);
+    _5ht = atof(_5ht_in);
 		
-		printf("Enter max scale length, or type \"quit\" to quit\n\n>");
-        fgets(scale_in,256,stdin);
-        if(quit(scale_in)==1)return 0;
+    printf("Enter max scale length, or type \"quit\" to quit\n\n>");
+    fgets(scale_in,256,stdin);
+    if(quit(scale_in)==1)return 0;
         
         
-        printf("Enter a max reward spawning delay, or type \"quit\" to quit\n\n>");
-        fgets(sp_delay_in, 256, stdin);
-        if(quit(sp_delay_in)==1)return 0;
+    printf("Enter a max reward spawning delay, or type \"quit\" to quit\n\n>");
+    fgets(sp_delay_in, 256, stdin);
+    if(quit(sp_delay_in)==1)return 0;
         
-        printf("Enter a max reward lifetime, or type \"quit\" to quit \n\n>");
+    printf("Enter a max reward lifetime, or type \"quit\" to quit \n\n>");
         
-        fgets(reward_life_in, 256, stdin);
-        if(quit(reward_life_in)==1)return 0;
+    fgets(reward_life_in, 256, stdin);
+    if(quit(reward_life_in)==1)return 0;
         
-        printf("calculating scaling...");
+    printf("calculating scaling...");
         
-        for(int sl = 10; sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
+    for(int sl = 10; sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
+    {
+        for(int rs = 1; rs<=atoi(sp_delay_in); rs++) //for 
         {
-            for(int rs = 1; rs<=atoi(sp_delay_in); rs++) //for 
+            for(int rd = 1; rd<=atoi(reward_life_in); rd++)
             {
-                for(int rd = 1; rd<=atoi(reward_life_in); rd++)
-                {
-                        run(10, (double)sl, (double)_5ht, (double)rs, (double)rd);
-                }
+                    run(10, (double)sl, (double)_5ht, (double)rs, (double)rd);
             }
         }
+    }
         
-        printf("done\n\n");
-        //for scale length (10s)
-        //for rs
-        //for rl
-        
-//  run(int sf, double scale, double _5ht, int r_delay ,int r_life)
-      
-    
+    printf("done\n\n");
+   
 
-
-
-
-
-		
-		
-		
-	//}
 
 
 
