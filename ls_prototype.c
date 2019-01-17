@@ -32,6 +32,7 @@ double _5ht;
 double sf;
 
 FILE* f; 
+FILE* r;
 
 
 
@@ -54,6 +55,7 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 	
 	bool end = false;
 	bool reward_sp = false;
+    bool reward_dsp;
 	double pos = 0;
 	double x = 1;
 	int steps = 0;
@@ -93,6 +95,7 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 				if(reward_sp==true && c2>=r_life)
 				{
 					reward_sp = false;
+                    reward_dsp = true;
 			//		printf("-------------------reward has despawned!-------------------\n");
 					fprintf(f,"-------------------reward has despawned!-------------------\n");
 				} 
@@ -109,14 +112,29 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 				{
 			//		printf("reward was successfully collected!\n\n");
 					fprintf(f,"reward was successfully collected!\n\n");
+                    
 				}
-				else
+				else if(!reward_dsp && reward_sp)
+				{
+			//		printf("reward was not successfully collected!\n\n");
+					fprintf(f,"reward was not successfully collected!\n\n");
+				}
+				else if(reward_dsp)
 				{
 			//		printf("reward was not successfully collected!\n\n");
 					fprintf(f,"reward was not successfully collected!\n\n");
 				}
 				end = true;
-		}
+		}    
+
+
+
+
+
+		
+		
+		
+	//}
 
 		
 
@@ -135,13 +153,17 @@ fileOut()
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
     
-    char name[sizeof("log%d-%d-%d %d:%d:%d.txt")] = "log";
+    char logname[sizeof("log%d-%d-%d %d:%d:%d.txt")] = "log";
+    char resultname[sizeof(("results%d-%d-%d %d:%d:%d.txt"))] = "results";
     char* date = malloc(sizeof("%d-%d-%d %d:%d:%d"));
     
     sprintf(date, "%d-%d-%d %d:%d:%d",tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
-	strcat(name, date);
-    strcat(name, ".txt");
-	f = fopen(name, "w");
+	strcat(logname, date);
+    strcat(logname, ".txt");
+    strcat(resultname, date);
+    strcat(resultname, ".txt");
+	f = fopen(logname, "w");
+    r = fopen(resultsname, "w");
 	return 0;
 }
 
