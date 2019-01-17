@@ -53,14 +53,16 @@ int
 run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 {
 	
-	bool end = false;
+	bool norm_reward_reached = false;
+    bool nutt_reward_reached = false;
 	bool reward_sp = false;
-    bool reward_dsp;
-	double pos = 0;
+    bool reward_dsp = false;
+    double pos = 0;
+	double nutt_pos = 0;
 	double x = 1;
+    double speed;
+    double nutt_speed;
 	int steps = 0;
-	double speed;
-	double speed_out;
 	int c1 = 0;
 	int c2 = 0;
 	
@@ -70,16 +72,19 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 	fprintf(f,"\n\n\nRun with scaling factor %d, scale length %g, reward delay %d, reward lifetime %d\n\n\n",sf,scale,r_delay,r_life);
 	fprintf(f,"__________________________________________________________________________\n\n\n\n");
 	
-	while(!end)
+	while(!norm_reward_reached && ! nutt_reward_reached)
 	{	
 
-		if(pos<=scale)
+		if(pos<=scale || nutt_pos<=scale)
 		{
 
-			speed = lookup(_5ht, x, false);
 			
-			speed_out = sf*speed;
-			pos+=(speed_out);
+			speed =(sf*lookup(_5ht, x, false));
+            nutt_speed = (sf*lookup(_5ht, x, true));
+            
+			if(pos<=scale)pos+=speed;
+            if(nutt_pos<=scale)nutt_pos+=nutt_speed;
+            
 			steps++;
 			c1++;
 			if(c1>=r_delay)
@@ -101,9 +106,10 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 				} 
 			}
 		//	printf("step : %i, position: %lf, speed:, %lf, 5ht: %g, vis: %g\n",steps ,pos, speed_out, _5ht, x);
-		fprintf(f,"step : %i, position: %lf, speed:, %lf, 5ht: %g, vis: %g\n",steps ,pos, speed_out, _5ht, x);
+		fprintf(f,"step : %i, position(normal): %lf, speed(normal): %lf, position(nutt): %lf, speed(nutt) 5ht: %g, vis: %g\n",steps, pos,speed,nutt_pos,nutt_speed,_5ht,x);
 		}
-		else
+		
+		if(pos>=scale)
 		{
 				
 				fprintf(f,"\n\n\n ...done\n");
@@ -111,21 +117,43 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 				if(reward_sp)
 				{
 			//		printf("reward was successfully collected!\n\n");
-					fprintf(f,"reward was successfully collected!\n\n");
+					fprintf(f,"reward was successfully collected by the normal agent!\n\n");
                     
 				}
 				else if(!reward_dsp && reward_sp)
 				{
 			//		printf("reward was not successfully collected!\n\n");
-					fprintf(f,"reward was not successfully collected!\n\n");
+					fprintf(f,"reward was not successfully collected by the normal agent!\n\n");
 				}
 				else if(reward_dsp)
 				{
 			//		printf("reward was not successfully collected!\n\n");
-					fprintf(f,"reward was not successfully collected!\n\n");
+					fprintf(f,"reward was not successfully collected by the normal agent!\n\n");
 				}
-				end = true;
+				norm_reward_reached = true;
 		}    
+		if(nutt_pos>=scale)
+        {
+                fprintf(f,"\n\n\n ...done\n");
+			//	printf("\n\n\n ...done\n");
+				if(reward_sp)
+				{
+			//		printf("reward was successfully collected!\n\n");
+					fprintf(f,"reward was successfully collected by the nutt agent!\n\n");
+                    
+				}
+				else if(!reward_dsp && reward_sp)
+				{
+			//		printf("reward was not successfully collected!\n\n");
+					fprintf(f,"reward was not successfully collected by the nutt agent!\n\n");
+				}
+				else if(reward_dsp)
+				{
+			//		printf("reward was not successfully collected!\n\n");
+					fprintf(f,"reward was not successfully collected by the nutt agent!\n\n");
+				}
+				nutt_reward_reached = true;
+        }
 
 
 
@@ -163,7 +191,7 @@ fileOut()
     strcat(resultname, date);
     strcat(resultname, ".txt");
 	f = fopen(logname, "w");
-    r = fopen(resultsname, "w");
+    r = fopen(resultname, "w");
 	return 0;
 }
 
