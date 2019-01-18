@@ -180,7 +180,7 @@ fileOut()
     
     char logname[sizeof("log%d-%d-%d %d:%d:%d.txt")] = "log";
     char resultname[sizeof(("results%d-%d-%d %d:%d:%d.txt"))] = "results";
-    char* date = malloc(sizeof("%d-%d-%d %d:%d:%d"));
+    char date[sizeof("%d-%d-%d %d:%d:%d")] = "";
     
     sprintf(date, "%d-%d-%d %d:%d:%d",tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 	strcat(logname, date);
@@ -264,9 +264,9 @@ main()
         
     for(int sl = 10; sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
     {
-        for(int rs = 1; rs<=atoi(sp_delay_in); rs++) //for 
+        for(int rs = 0; rs<=atoi(sp_delay_in); rs=rs+5) //for 
         {
-            for(int rd = 1; rd<=atoi(reward_life_in); rd++)
+            for(int rd = 0; rd<=atoi(reward_life_in); rd=rd+5)
             {
                     run(10, (double)sl, (double)_5ht, (double)rs, (double)rd);
             }
