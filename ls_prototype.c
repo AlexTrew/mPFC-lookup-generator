@@ -55,6 +55,8 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 	
 	bool norm_reward_reached = false;
     bool nutt_reward_reached = false;
+    bool norm_reward_collected = false;
+    bool nutt_reward_missed = false;
 	bool reward_sp = false;
     bool reward_dsp = false;
     double pos = 0;
@@ -71,19 +73,19 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 
 	fprintf(f,"\n\n\nRun with scaling factor %d, scale length %g, reward delay %d, reward lifetime %d\n\n\n",sf,scale,r_delay,r_life);
 	fprintf(f,"__________________________________________________________________________\n\n\n\n");
+    
 	
-	while(!norm_reward_reached && ! nutt_reward_reached)
+	while(pos<scale || nutt_pos<scale)
 	{	
 
-		if(pos<=scale || nutt_pos<=scale)
-		{
+		
 
 			
 			speed =(sf*lookup(_5ht, x, false));
             nutt_speed = (sf*lookup(_5ht, x, true));
             
-			if(pos<=scale)pos+=speed;
-            if(nutt_pos<=scale)nutt_pos+=nutt_speed;
+			if(pos<scale)pos+=speed;
+            if(nutt_pos<scale)nutt_pos+=nutt_speed;
             
 			steps++;
 			c1++;
@@ -106,35 +108,36 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 				} 
 			}
 		//	printf("step : %i, position: %lf, speed:, %lf, 5ht: %g, vis: %g\n",steps ,pos, speed_out, _5ht, x);
-		fprintf(f,"step : %i, position(normal): %lf, speed(normal): %lf, position(nutt): %lf, speed(nutt) 5ht: %g, vis: %g\n",steps, pos,speed,nutt_pos,nutt_speed,_5ht,x);
-		}
+		fprintf(f,"step : %i, position(normal): %lf, speed(normal): %lf, position(nutt): %lf, speed(nutt) %lf, 5ht: %g, vis: %g\n",steps, pos,speed,nutt_pos,nutt_speed,_5ht,x);
 		
-		if(pos>=scale)
+		
+		if(!norm_reward_reached && pos>=scale)
 		{
 				
-				fprintf(f,"\n\n\n ...done\n");
+				fprintf(f," Normal agent has reached the reward location.\n");
 			//	printf("\n\n\n ...done\n");
 				if(reward_sp)
 				{
 			//		printf("reward was successfully collected!\n\n");
 					fprintf(f,"reward was successfully collected by the normal agent!\n\n");
-                    
+                    norm_reward_collected = true;
 				}
-				else if(!reward_dsp && reward_sp)
+				if(!reward_sp && !reward_dsp)
 				{
 			//		printf("reward was not successfully collected!\n\n");
-					fprintf(f,"reward was not successfully collected by the normal agent!\n\n");
+					fprintf(f,"reward was not spawned when reached by the normal agent!\n\n");
 				}
-				else if(reward_dsp)
+				if(reward_dsp)
 				{
 			//		printf("reward was not successfully collected!\n\n");
 					fprintf(f,"reward was not successfully collected by the normal agent!\n\n");
 				}
 				norm_reward_reached = true;
-		}    
-		if(nutt_pos>=scale)
+		}  
+		
+		if(!nutt_reward_reached && nutt_pos>=scale)
         {
-                fprintf(f,"\n\n\n ...done\n");
+                fprintf(f,"Nutt agent has reached the reward location.\n");
 			//	printf("\n\n\n ...done\n");
 				if(reward_sp)
 				{
@@ -142,32 +145,26 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 					fprintf(f,"reward was successfully collected by the nutt agent!\n\n");
                     
 				}
-				else if(!reward_dsp && reward_sp)
+				if(!reward_sp && !reward_dsp)
 				{
 			//		printf("reward was not successfully collected!\n\n");
-					fprintf(f,"reward was not successfully collected by the nutt agent!\n\n");
+					fprintf(f,"reward was not spawned when reached by the nutt agent!\n\n");
+                    nutt_reward_missed = true;
 				}
-				else if(reward_dsp)
+				if(reward_dsp)
 				{
 			//		printf("reward was not successfully collected!\n\n");
 					fprintf(f,"reward was not successfully collected by the nutt agent!\n\n");
 				}
 				nutt_reward_reached = true;
         }
-
-
-
-
-
-		
-		
-		
-	//}
-
-		
-
-		
+	
 	}
+	
+	if(norm_reward_collected && nutt_reward_missed)
+        {
+         fprintf(r,"Scale length: %lf, Spawn Delay: %d, Reward Life: %d\n\n",scale,r_delay,r_life);  
+        }
 	
 
 	
@@ -263,6 +260,7 @@ main()
     if(quit(reward_life_in)==1)return 0;
         
     printf("calculating scaling...");
+    fprintf(r,"Appropriate configurations:\n\n"); 
         
     for(int sl = 10; sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
     {
@@ -274,6 +272,8 @@ main()
             }
         }
     }
+    
+    
         
     printf("done\n\n");
    
