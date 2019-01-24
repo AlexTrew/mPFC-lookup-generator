@@ -22,6 +22,7 @@ compile using gcc as >gcc -W -Wall ls_prototype -o ls_prototype -lm
 #include "string.h"
 #include "stdlib.h"
 #include <time.h>
+#include "unistd.h"
 
 
 
@@ -33,6 +34,7 @@ double sf;
 
 FILE* f; 
 FILE* r;
+FILE* c;
 
 
 
@@ -162,6 +164,7 @@ fileOut()
     char logname[sizeof("log%d-%d-%d %d:%d:%d.txt")] = "log";
     char resultname[sizeof(("results%d-%d-%d %d:%d:%d.txt"))] = "results";
     char date[sizeof("%d-%d-%d %d:%d:%d")] = "";
+    char* cfg = "cfg.txt";
     
     sprintf(date, "%d-%d-%d %d:%d:%d",tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 	strcat(logname, date);
@@ -170,8 +173,25 @@ fileOut()
     strcat(resultname, ".txt");
 	f = fopen(logname, "w");
     r = fopen(resultname, "w");
-	return 0;
-}
+    
+    
+    
+    
+    if( access( cfg, F_OK ) != -1 ) {     //check if cfg already exists
+
+        c = fopen(cfg, "wr");
+    } else {     //if not, create cfg
+        c = fopen(cfg, "wr");
+        fprintf(c,
+            "normal 1\nnormal_close 1\nnormal_adjacent 1\nnormal_far 0\nfast 1\nfast_close 1\nfast_adjacent 1\nfast_far 1\nnutt 0\nnutt_close 0\nnutt_adjacent 0\nnutt_far 0\ndrn_suppress 0\ndrn_suppress_close 0\ndrn_suppress_adjacent 0\ndrn_suppress_far 0\ndrn_suppress_fast 0\ndrn_suppress_fast_close 0\ndrn_suppress_fast_adjacent 0\ndrn_suppress_fast_far 0\ndrn_suppress_ssri 0\ndrn_suppress_ssri_close 0\ndrn_suppress_ssri_adjacent 0\ndrn_suppress_ssri_far 0\ndrn_suppress_ssri_fast 0\ndrn_suppress_ssri_fast_close 0\ndrn_suppress_ssri_fast_adjacent 0\ndrn_suppress_ssri_fast_far 0\n"
+        );
+        
+        printf("cfg.txt generated. Edit this file to customise passing conditions.\n\n");
+    }
+    
+
+        return 0;
+    }
 
 int 
 quit(char* str)
@@ -215,11 +235,10 @@ main()
     double rad;
 
     
+    printf("Welcome to Alex's mPFC activity measurement prototype! Type \"quit\" to quit.\n\n");	
+
+    
     fileOut();
-
-
-
-	printf("Welcome to Alex's mPFC activity measurement prototype! Type \"quit\" to quit.\n\n");	
 	
 
 	//while(true)
@@ -250,13 +269,14 @@ main()
     fgets(r_in,256,stdin);
     if(quit(r_in)==1)return 0;
     
-    rad = atof(r_in); 
+    
         
     printf("calculating scaling...");
     fprintf(r,"Appropriate configurations:\n\n"); 
         
     for(int sl = 10; sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
     {
+        rad = (45/10) * sl; 
         for(double rs = 0; rs<=atoi(sp_delay_in); rs=rs+10) //for 
         {
             for(int rd = 0; rd<=atoi(reward_life_in); rd=rd+10)
@@ -283,7 +303,7 @@ main()
                 result[15] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, rs, (double)rd,2)); //nutt + fast reward(adjacent)
                 result[16] = (simulate(10, (double)sl+(2*rad), (double)_5ht, rs, (double)rd,2)); //nutt + fast reward(far)
                 
-                result[17] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,3)); //drn supress
+                result[17] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,3)); //drn suppress
                 result[18] = (simulate(10, (double)sl-(2*rad), (double)_5ht, rs, (double)rd,3)); //drn supress(close)
                 result[19] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, rs, (double)rd,3)); //drn supress(adjacent)
                 result[20] = (simulate(10, (double)sl+(2*rad), (double)_5ht, rs, (double)rd,3)); //drn supress(far)    
@@ -305,8 +325,9 @@ main()
                 result[32] = (simulate(10, (double)sl+(2*rad), (double)_5ht, (rs/3)*2, (double)rd,4)); //drn + ssri + fast reward(far)
 
                 
-                sprintf(temp, "%d%d%d%d%d%d%d%d",result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7]);
-                if(strcmp("11000000",temp)==0)
+                sprintf(temp, "%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d",result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7],result[8],result[9],result[10],result[11],result[12],result[13],result[14],result[15],result[16],result[17],result[18],result[19],result[20],result[21],result[22],result[23],result[24],result[25],result[26],result[27],result[28],result[29],result[30],result[31],result[32]);
+                
+                if(strcmp("111011110000",temp)==0)
                 {
                    
                    fprintf(r,"scale length : %d, spawn delay:  %.2lf , reward life: %d. \n\n",sl,rs,rd); 
@@ -317,6 +338,7 @@ main()
             }
         }
     }
+    
     fclose(f);
     fclose(r);
         
