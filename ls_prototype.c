@@ -38,32 +38,41 @@ FILE* r;
 
 
 double 
-lookup(double _5ht,double max5ht, bool nutt)
+lookup(double _5ht,double max5ht, int type)
 {
-    if(!nutt)
+    switch(type)
     {
-     return (1-exp(-pow(max5ht/_5ht,_5ht)))*_5ht;   
+        case 1: //control
+            return (1-exp(-pow(max5ht/_5ht,_5ht)))*_5ht;
+            
+        case 2://nutt
+            return (1-exp(-pow(max5ht/_5ht,_5ht)))*(_5ht+1);
+        
+        case 3: //drn supression
+            return ((1-exp(-pow(max5ht/_5ht,_5ht)))*_5ht)/10;
+        
+        case 4: //drn_supression + ssri
+            return (((1-exp(-pow(max5ht/_5ht,_5ht)))*_5ht)/10) + 0.5; //TODO experiment 
+            
+                    
     }
     
-     return (1-exp(-pow(max5ht/_5ht,_5ht)))*(_5ht+1);
+     
 
 }
 
 int
-run(int sf, double scale, double _5ht, int r_delay ,int r_life)
+simulate(int sf, double scale, double _5ht, int r_delay ,int r_life, int type)
 {
 	
-	bool norm_reward_reached = false;
-    bool nutt_reward_reached = false;
-    bool norm_reward_collected = false;
-    bool nutt_reward_missed = false;
+	
+    bool reward_reached = false;
+    bool reward_collected = false;
 	bool reward_sp = false;
     bool reward_dsp = false;
     double pos = 0;
-	double nutt_pos = 0;
 	double x = 1;
     double speed;
-    double nutt_speed;
 	int steps = 0;
 	int c1 = 0;
 	int c2 = 0;
@@ -75,17 +84,15 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 	fprintf(f,"__________________________________________________________________________\n\n\n\n");
     
 	
-	while(pos<scale || nutt_pos<scale)
+	while(pos<scale)
 	{	
 
 		
 
 			
-			speed =(sf*lookup(_5ht, x, false));
-            nutt_speed = (sf*lookup(_5ht, x, true));
+			speed =(sf*lookup(_5ht, x, type));
             
 			if(pos<scale)pos+=speed;
-            if(nutt_pos<scale)nutt_pos+=nutt_speed;
             
 			steps++;
 			c1++;
@@ -108,10 +115,10 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 				} 
 			}
 		//	printf("step : %i, position: %lf, speed:, %lf, 5ht: %g, vis: %g\n",steps ,pos, speed_out, _5ht, x);
-		fprintf(f,"step : %i, position(normal): %lf, speed(normal): %lf, position(nutt): %lf, speed(nutt) %lf, 5ht: %g, vis: %g\n",steps, pos,speed,nutt_pos,nutt_speed,_5ht,x);
+		fprintf(f,"step : %i, position(normal): %lf, speed(normal): %lf, 5ht: %g, vis: %g\n",steps, pos,speed,_5ht,x);
 		
 		
-		if(!norm_reward_reached && pos>=scale)
+		if(!reward_reached && pos>=scale)
 		{
 				
 				fprintf(f," Normal agent has reached the reward location.\n");
@@ -120,7 +127,7 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 				{
 			//		printf("reward was successfully collected!\n\n");
 					fprintf(f,"reward was successfully collected by the normal agent!\n\n");
-                    norm_reward_collected = true;
+                    reward_collected = true;
 				}
 				if(!reward_sp && !reward_dsp)
 				{
@@ -129,46 +136,20 @@ run(int sf, double scale, double _5ht, int r_delay ,int r_life)
 				}
 				if(reward_dsp)
 				{
-			//		printf("reward was not successfully collected!\n\n");
+					//printf("reward was not successfully collected!\n\n");
 					fprintf(f,"reward was not successfully collected by the normal agent!\n\n");
 				}
-				norm_reward_reached = true;
+				reward_reached = true;
 		}  
 		
-		if(!nutt_reward_reached && nutt_pos>=scale)
-        {
-                fprintf(f,"Nutt agent has reached the reward location.\n");
-			//	printf("\n\n\n ...done\n");
-				if(reward_sp)
-				{
-			//		printf("reward was successfully collected!\n\n");
-					fprintf(f,"reward was successfully collected by the nutt agent!\n\n");
-                    
-				}
-				if(!reward_sp && !reward_dsp)
-				{
-			//		printf("reward was not successfully collected!\n\n");
-					fprintf(f,"reward was not spawned when reached by the nutt agent!\n\n");
-                    nutt_reward_missed = true;
-				}
-				if(reward_dsp)
-				{
-			//		printf("reward was not successfully collected!\n\n");
-					fprintf(f,"reward was not successfully collected by the nutt agent!\n\n");
-				}
-				nutt_reward_reached = true;
-        }
-	
 	}
-	
-	if(norm_reward_collected && nutt_reward_missed)
-        {
-         fprintf(r,"Scale length: %lf, Spawn Delay: %d, Reward Life: %d\n\n",scale,r_delay,r_life);  
-        }
 	
 
 	
-	return 0;
+
+	if(reward_collected) return 1;
+    
+    return 0;
 }
 
 int 
@@ -222,7 +203,8 @@ main()
     char sp_delay_in[64];
     char reward_life_in[64];
     char _5ht_in[4];
-    
+    char temp[7];
+    int result[7];
     double _5ht;
 
 	bool prog = true;
@@ -262,23 +244,69 @@ main()
     printf("calculating scaling...");
     fprintf(r,"Appropriate configurations:\n\n"); 
         
-    for(int sl = 10; sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
+    for(int sl = 100; sl<=atoi(scale_in); sl=sl+100 ) //for scale lengths
     {
-        for(int rs = 0; rs<=atoi(sp_delay_in); rs=rs+5) //for 
+        for(double rs = 0; rs<=atoi(sp_delay_in); rs=rs+10) //for 
         {
-            for(int rd = 0; rd<=atoi(reward_life_in); rd=rd+5)
+            for(int rd = 0; rd<=atoi(reward_life_in); rd=rd+10)
             {
-                    run(10, (double)sl, (double)_5ht, (double)rs, (double)rd);
+                
+
+                result[0] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,1)); //normal
+                result[1] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward
+                result[2] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,2)); //nutt
+                result[3] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,2)); //nutt + fast reward
+                result[4] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,3)); //drn supress
+                result[5] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,3)); //drn suppress + fast reward
+                result[6] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,4)); //drn + ssri
+                result[7] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,4)); //drn + ssri + fast reward
+                
+                sprintf(temp, "%d%d%d%d%d%d%d%d",result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7]);
+                if(strcmp("11000000",temp)==0)
+                {
+                   
+                   fprintf(r,"scale length : %d, spawn delay:  %.2lf , reward life: %d. \n\n",sl,rs,rd); 
+                   printf("configuration found!: scale length : %d, spawn delay:  %.0lf , reward life: %d. \n\n",sl,rs,rd);
+                }
+                    
+                
             }
         }
     }
-    
-    
+    fclose(f);
+    fclose(r);
         
     printf("done\n\n");
+    
+    
    
 
 
 
 
 }
+
+
+/*
+ * TODO
+ * 
+ * add half 5ht value to default setup. 
+ * 
+ * reward spawns 1/3 earlier
+ * 
+ * check out https://github.com/berndporr/limbic-system-simulator/blob/master/limbic-system-simulator.cpp
+ * 
+ * run with 1/10 5ht (drn supression)
+ * 
+ * add ssri baseline value to 5ht (0.15)
+ * 
+ * add drn offset (add 0.25 of 5ht)
+ * 
+ * add vis1 only speed output and vis1+vis2 speed output to reward
+ * 
+ * check page 25 of bernd paper
+ * 
+ * 
+ * 
+ */
+
