@@ -191,6 +191,11 @@ quit(char* str)
 		return 0;
 }
 
+double pythagoras(double s1, double s2)
+{
+    return sqrt(pow(s1,2) + pow(s2,2));   
+}
+
 
 
 
@@ -203,11 +208,11 @@ main()
     char sp_delay_in[64];
     char reward_life_in[64];
     char _5ht_in[4];
-    char temp[7];
-    int result[7];
+    char r_in[2];
+    char temp[32];
+    int result[32];
     double _5ht;
-
-	bool prog = true;
+    double rad;
 
     
     fileOut();
@@ -240,11 +245,17 @@ main()
         
     fgets(reward_life_in, 256, stdin);
     if(quit(reward_life_in)==1)return 0;
+    
+    printf("Enter reward location radius, or type \"quit\" to quit\n\n>");
+    fgets(r_in,256,stdin);
+    if(quit(r_in)==1)return 0;
+    
+    rad = atof(r_in); 
         
     printf("calculating scaling...");
     fprintf(r,"Appropriate configurations:\n\n"); 
         
-    for(int sl = 100; sl<=atoi(scale_in); sl=sl+100 ) //for scale lengths
+    for(int sl = 10; sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
     {
         for(double rs = 0; rs<=atoi(sp_delay_in); rs=rs+10) //for 
         {
@@ -253,13 +264,46 @@ main()
                 
 
                 result[0] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,1)); //normal
-                result[1] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward
-                result[2] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,2)); //nutt
-                result[3] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,2)); //nutt + fast reward
-                result[4] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,3)); //drn supress
-                result[5] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,3)); //drn suppress + fast reward
-                result[6] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,4)); //drn + ssri
-                result[7] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,4)); //drn + ssri + fast reward
+                result[1] = (simulate(10, (double)sl-(2*rad), (double)_5ht, rs, (double)rd,1)); //normal(close reward)
+                result[2] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, rs, (double)rd,1)); //normal(adjacent reward)
+                result[3] = (simulate(10, (double)sl+(2*rad), (double)_5ht, rs, (double)rd,1)); //normal(far reward)
+                
+                result[5] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward
+                result[6] = (simulate(10, (double)sl-(2*rad), (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward(close)
+                result[7] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward(adjacent)
+                result[8] = (simulate(10, (double)sl+(2*rad), (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward(far)
+                
+                result[9] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,2)); //nutt
+                result[10] = (simulate(10, (double)sl-(2*rad), (double)_5ht, rs, (double)rd,2)); //nutt(close)
+                result[11] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, rs, (double)rd,2)); //nutt(adjacent)
+                result[12] = (simulate(10, (double)sl+(2*rad), (double)_5ht, rs, (double)rd,2)); //nutt(far)
+                
+                result[13] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,2)); //nutt + fast reward
+                result[14] = (simulate(10, (double)sl-(2*rad), (double)_5ht, rs, (double)rd,2)); //nutt + fast reward(close)
+                result[15] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, rs, (double)rd,2)); //nutt + fast reward(adjacent)
+                result[16] = (simulate(10, (double)sl+(2*rad), (double)_5ht, rs, (double)rd,2)); //nutt + fast reward(far)
+                
+                result[17] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,3)); //drn supress
+                result[18] = (simulate(10, (double)sl-(2*rad), (double)_5ht, rs, (double)rd,3)); //drn supress(close)
+                result[19] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, rs, (double)rd,3)); //drn supress(adjacent)
+                result[20] = (simulate(10, (double)sl+(2*rad), (double)_5ht, rs, (double)rd,3)); //drn supress(far)    
+                
+                result[21] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,3)); //drn suppress + fast reward
+                result[22] = (simulate(10, (double)sl-(2*rad), (double)_5ht, (rs/3)*2, (double)rd,3)); //drn suppress + fast reward(close)
+                result[23] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, (rs/3)*2, (double)rd,3)); //drn suppress + fast reward(adjacent)
+                result[24] = (simulate(10, (double)sl+(2*rad), (double)_5ht, (rs/3)*2, (double)rd,3)); //drn suppress + fast reward(far)
+
+                result[25] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,4)); //drn + ssri
+                result[26] = (simulate(10, (double)sl-(2*rad), (double)_5ht, rs, (double)rd,4)); //drn + ssri(close)
+                result[27] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, rs, (double)rd,4)); //drn + ssri(adjacent)
+                result[28] = (simulate(10, (double)sl+(2*rad), (double)_5ht, rs, (double)rd,4)); //drn + ssri(far)
+
+                        
+                result[29] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,4)); //drn + ssri + fast reward
+                result[30] = (simulate(10, (double)sl-(2*rad), (double)_5ht, (rs/3)*2, (double)rd,4)); //drn + ssri + fast reward(close)
+                result[31] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, (rs/3)*2, (double)rd,4)); //drn + ssri + fast reward(adjacent)
+                result[32] = (simulate(10, (double)sl+(2*rad), (double)_5ht, (rs/3)*2, (double)rd,4)); //drn + ssri + fast reward(far)
+
                 
                 sprintf(temp, "%d%d%d%d%d%d%d%d",result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7]);
                 if(strcmp("11000000",temp)==0)
