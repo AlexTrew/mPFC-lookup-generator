@@ -179,9 +179,9 @@ fileOut()
     
     if( access( cfg, F_OK ) != -1 ) {     //check if cfg already exists
 
-        c = fopen(cfg, "wr");
+        c = fopen(cfg, "w");
     } else {     //if not, create cfg
-        c = fopen(cfg, "wr");
+        c = fopen(cfg, "w");
         fprintf(c,
             "normal 1\nnormal_close 1\nnormal_adjacent 1\nnormal_far 0\nfast 1\nfast_close 1\nfast_adjacent 1\nfast_far 1\nnutt 0\nnutt_close 0\nnutt_adjacent 0\nnutt_far 0\ndrn_suppress 0\ndrn_suppress_close 0\ndrn_suppress_adjacent 0\ndrn_suppress_far 0\ndrn_suppress_fast 0\ndrn_suppress_fast_close 0\ndrn_suppress_fast_adjacent 0\ndrn_suppress_fast_far 0\ndrn_suppress_ssri 0\ndrn_suppress_ssri_close 0\ndrn_suppress_ssri_adjacent 0\ndrn_suppress_ssri_far 0\ndrn_suppress_ssri_fast 0\ndrn_suppress_ssri_fast_close 0\ndrn_suppress_ssri_fast_adjacent 0\ndrn_suppress_ssri_fast_far 0\n"
         );
@@ -191,7 +191,29 @@ fileOut()
     
 
         return 0;
+}
+
+char readcfg()
+{
+    int lines = 0;
+    char out[32] = "";
+    char line[64] = "";
+    
+    int i=0;
+    
+    while (fgets(line, 64, c) != NULL)
+    {
+        out[i] = line[strlen(line)-1];
+        i++;
     }
+    
+        
+    fclose(c);
+    
+    
+    
+    return out;
+}
 
 int 
 quit(char* str)
@@ -227,12 +249,11 @@ main()
     char scale_in[64];
     char sp_delay_in[64];
     char reward_life_in[64];
-    char _5ht_in[4];
-    char r_in[2];
-    char temp[32];
-    int result[32];
+    char _5ht_in[4] = "";
+    char temp[32] = "";
+    int result[32] = {};
     double _5ht;
-    double rad;
+    double rad = 0;
 
     
     printf("Welcome to Alex's mPFC activity measurement prototype! Type \"quit\" to quit.\n\n");	
@@ -264,13 +285,7 @@ main()
         
     fgets(reward_life_in, 256, stdin);
     if(quit(reward_life_in)==1)return 0;
-    
-    printf("Enter reward location radius, or type \"quit\" to quit\n\n>");
-    fgets(r_in,256,stdin);
-    if(quit(r_in)==1)return 0;
-    
-    
-        
+
     printf("calculating scaling...");
     fprintf(r,"Appropriate configurations:\n\n"); 
         
@@ -327,11 +342,10 @@ main()
                 
                 sprintf(temp, "%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d",result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7],result[8],result[9],result[10],result[11],result[12],result[13],result[14],result[15],result[16],result[17],result[18],result[19],result[20],result[21],result[22],result[23],result[24],result[25],result[26],result[27],result[28],result[29],result[30],result[31],result[32]);
                 
-                if(strcmp("111011110000",temp)==0)
+                if(strcmp(readcfg,temp)==0)
                 {
-                   
                    fprintf(r,"scale length : %d, spawn delay:  %.2lf , reward life: %d. \n\n",sl,rs,rd); 
-                   printf("configuration found!: scale length : %d, spawn delay:  %.0lf , reward life: %d. \n\n",sl,rs,rd);
+                //   printf("configuration found!: scale length : %d, spawn delay:  %.0lf , reward life: %d. \n\n",sl,rs,rd);
                 }
                     
                 
