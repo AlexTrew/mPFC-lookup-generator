@@ -31,6 +31,7 @@ compile using gcc as >gcc -W -Wall ls_prototype -o ls_prototype -lm
 double scale;
 double _5ht;
 double sf;
+char cfgdata[1024] = "";
 
 FILE* f; 
 FILE* r;
@@ -179,13 +180,13 @@ fileOut()
     
     if( access( cfg, F_OK ) != -1 ) {     //check if cfg already exists
 
-        c = fopen(cfg, "w");
+        c = fopen(cfg, "r");
     } else {     //if not, create cfg
         c = fopen(cfg, "w");
         fprintf(c,
-            "normal 1\nnormal_close 1\nnormal_adjacent 1\nnormal_far 0\nfast 1\nfast_close 1\nfast_adjacent 1\nfast_far 1\nnutt 0\nnutt_close 0\nnutt_adjacent 0\nnutt_far 0\ndrn_suppress 0\ndrn_suppress_close 0\ndrn_suppress_adjacent 0\ndrn_suppress_far 0\ndrn_suppress_fast 0\ndrn_suppress_fast_close 0\ndrn_suppress_fast_adjacent 0\ndrn_suppress_fast_far 0\ndrn_suppress_ssri 0\ndrn_suppress_ssri_close 0\ndrn_suppress_ssri_adjacent 0\ndrn_suppress_ssri_far 0\ndrn_suppress_ssri_fast 0\ndrn_suppress_ssri_fast_close 0\ndrn_suppress_ssri_fast_adjacent 0\ndrn_suppress_ssri_fast_far 0\n"
+            "#Edit this file to control what models you want to pass/fail. 0 is fail, 1 is pass#\n\nnormal 1\nnormal_close 1\nnormal_adjacent 1\nnormal_far 0\nfast 1\nfast_close 1\nfast_adjacent 1\nfast_far 1\nnutt 0\nnutt_close 0\nnutt_adjacent 0\nnutt_far 0\ndrn_suppress 0\ndrn_suppress_close 0\ndrn_suppress_adjacent 0\ndrn_suppress_far 0\ndrn_suppress_fast 0\ndrn_suppress_fast_close 0\ndrn_suppress_fast_adjacent 0\ndrn_suppress_fast_far 0\ndrn_suppress_ssri 0\ndrn_suppress_ssri_close 0\ndrn_suppress_ssri_adjacent 0\ndrn_suppress_ssri_far 0\ndrn_suppress_ssri_fast 0\ndrn_suppress_ssri_fast_close 0\ndrn_suppress_ssri_fast_adjacent 0\ndrn_suppress_ssri_fast_far 0\n"
         );
-        
+        fclose(c);
         printf("cfg.txt generated. Edit this file to customise passing conditions.\n\n");
     }
     
@@ -193,26 +194,34 @@ fileOut()
         return 0;
 }
 
-char readcfg()
+void append(char* s, char c) {
+        int len = strlen(s);
+        s[len] = c;
+        s[len+1] = '\0';
+}
+
+int readcfg(FILE* c)
 {
-    int lines = 0;
-    char out[32] = "";
-    char line[64] = "";
+    
+    char line[1024] = "";
     
     int i=0;
     
-    while (fgets(line, 64, c) != NULL)
+   
+    while (fgets(line, sizeof(line), c) != NULL)
     {
-        out[i] = line[strlen(line)-1];
-        i++;
+
+        if(strcmp(line,"") && line[0] != '#')
+        {
+         append(cfgdata,line[strlen(line) - 2]);
+        // printf("%c", );
+       
+        }
+    
     }
     
-        
-    fclose(c);
-    
-    
-    
-    return out;
+
+    return 0;
 }
 
 int 
@@ -288,6 +297,9 @@ main()
 
     printf("calculating scaling...");
     fprintf(r,"Appropriate configurations:\n\n"); 
+    
+    readcfg(c);
+    //printf("%s\n", cfgdata);
         
     for(int sl = 10; sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
     {
@@ -342,7 +354,9 @@ main()
                 
                 sprintf(temp, "%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d",result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7],result[8],result[9],result[10],result[11],result[12],result[13],result[14],result[15],result[16],result[17],result[18],result[19],result[20],result[21],result[22],result[23],result[24],result[25],result[26],result[27],result[28],result[29],result[30],result[31],result[32]);
                 
-                if(strcmp(readcfg,temp)==0)
+                
+                
+                if(strcmp(cfgdata,temp)==0)
                 {
                    fprintf(r,"scale length : %d, spawn delay:  %.2lf , reward life: %d. \n\n",sl,rs,rd); 
                 //   printf("configuration found!: scale length : %d, spawn delay:  %.0lf , reward life: %d. \n\n",sl,rs,rd);
@@ -355,6 +369,7 @@ main()
     
     fclose(f);
     fclose(r);
+    fclose(c);
         
     printf("done\n\n");
     
