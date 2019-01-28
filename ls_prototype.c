@@ -65,7 +65,7 @@ lookup(double _5ht,double max5ht, int type)
 }
 
 int
-simulate(int sf, double scale, double _5ht, int r_delay ,int r_life, int type)
+simulate(char* name, char* dist, int sf, double scale, double _5ht, int r_delay ,int r_life, int type)
 {
 	
 	
@@ -83,7 +83,7 @@ simulate(int sf, double scale, double _5ht, int r_delay ,int r_life, int type)
 	//printf("\n\n\nRun with scaling factor %d, scale length %g, reward delay %d, reward lifetime %d\n\n\n",sf,scale,r_delay,r_life);
 	//printf("__________________________________________________________________________\n\n\n\n");
 
-	fprintf(f,"\n\n\nRun with scaling factor %d, scale length %g, reward delay %d, reward lifetime %d\n\n\n",sf,scale,r_delay,r_life);
+	fprintf(f,"\n\n\n %s %s scenario Run with scaling factor %d, scale length %g, reward delay %d, reward lifetime %d\n\n\n",name, dist, sf,scale,r_delay,r_life);
 	fprintf(f,"__________________________________________________________________________\n\n\n\n");
     
 	
@@ -150,7 +150,7 @@ simulate(int sf, double scale, double _5ht, int r_delay ,int r_life, int type)
 
 	
 
-	if(reward_collected) return 1;
+	if(reward_collected)return 1;
     
     return 0;
 }
@@ -210,17 +210,17 @@ int readcfg(FILE* c)
    
     while (fgets(line, sizeof(line), c) != NULL)
     {
-
+        
         if(strcmp(line,"") && line[0] != '#')
         {
          append(cfgdata,line[strlen(line) - 2]);
-        // printf("%c", );
+        
        
         }
     
     }
     
-
+    printf("\n%s\n",cfgdata);
     return 0;
 }
 
@@ -258,6 +258,7 @@ main()
     char scale_in[64];
     char sp_delay_in[64];
     char reward_life_in[64];
+    char rad_in[64];
     char _5ht_in[4] = "";
     char temp[32] = "";
     int result[32] = {};
@@ -294,32 +295,39 @@ main()
         
     fgets(reward_life_in, 256, stdin);
     if(quit(reward_life_in)==1)return 0;
+    
+    printf("Enter a reward location radius, or type \"quit\" to quit \n\n>");
+    
+    fgets(rad_in, 256, stdin);
+    if(quit(rad_in)==1)return 0;
 
     printf("calculating scaling...");
     fprintf(r,"Appropriate configurations:\n\n"); 
     
     readcfg(c);
     //printf("%s\n", cfgdata);
+    
+    rad = atoi(rad_in);
         
     for(int sl = 10; sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
     {
-        rad = (45/10) * sl; 
-        for(double rs = 0; rs<=atoi(sp_delay_in); rs=rs+10) //for 
+       
+        for(double rs = 0; (rs<sl && rs<=atoi(sp_delay_in)); rs=rs+1) //for 
         {
-            for(int rd = 0; rd<=atoi(reward_life_in); rd=rd+10)
+            for(int rd = 0; (rd<sl && rd<=atoi(reward_life_in)); rd=rd+1)
             {
                 
 
-                result[0] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,1)); //normal
-                result[1] = (simulate(10, (double)sl-(2*rad), (double)_5ht, rs, (double)rd,1)); //normal(close reward)
-                result[2] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, rs, (double)rd,1)); //normal(adjacent reward)
-                result[3] = (simulate(10, (double)sl+(2*rad), (double)_5ht, rs, (double)rd,1)); //normal(far reward)
-                
-                result[5] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward
-                result[6] = (simulate(10, (double)sl-(2*rad), (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward(close)
-                result[7] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward(adjacent)
-                result[8] = (simulate(10, (double)sl+(2*rad), (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward(far)
-                
+                result[0] = (simulate("normal", "centre", 10, (double)sl, (double)_5ht, rs, (double)rd,1)); //normal
+                result[1] = (simulate("normal", "close",10, (double)sl-(2*rad), (double)_5ht, rs, (double)rd,1)); //normal(close reward)
+                result[2] = (simulate("normal", "adjacent",10, pythagoras(sl,rad), (double)_5ht, rs, (double)rd,1)); //normal(adjacent reward)
+                result[3] = (simulate("normal", "far",10, (double)sl+(2*rad), (double)_5ht, rs, (double)rd,1)); //normal(far reward)
+             /*  
+                result[4] = (simulate(10, (double)sl, (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward
+                result[5] = (simulate(10, (double)sl-(2*rad), (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward(close)
+                result[6] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward(adjacent)
+                result[7] = (simulate(10, (double)sl+(2*rad), (double)_5ht, (rs/3)*2, (double)rd,1)); //fast reward(far)
+ /*               
                 result[9] = (simulate(10, (double)sl, (double)_5ht, rs, (double)rd,2)); //nutt
                 result[10] = (simulate(10, (double)sl-(2*rad), (double)_5ht, rs, (double)rd,2)); //nutt(close)
                 result[11] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, rs, (double)rd,2)); //nutt(adjacent)
@@ -350,16 +358,20 @@ main()
                 result[30] = (simulate(10, (double)sl-(2*rad), (double)_5ht, (rs/3)*2, (double)rd,4)); //drn + ssri + fast reward(close)
                 result[31] = (simulate(10, pythagoras(sl,2*rad), (double)_5ht, (rs/3)*2, (double)rd,4)); //drn + ssri + fast reward(adjacent)
                 result[32] = (simulate(10, (double)sl+(2*rad), (double)_5ht, (rs/3)*2, (double)rd,4)); //drn + ssri + fast reward(far)
+                
+           /*     %d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d ,result[4],result[5],result[6],result[7],result[8],result[9],result[10],result[11],result[12],result[13],result[14],result[15],result[16],result[17],result[18],result[19],result[20],result[21],result[22],result[23],result[24],result[25],result[26],result[27],result[28],result[29],result[30],result[31],result[32]
+            
 
+    */            
+                sprintf(temp, "%d%d%d%d ",result[0],result[1],result[2],result[3]);
                 
-                sprintf(temp, "%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d",result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7],result[8],result[9],result[10],result[11],result[12],result[13],result[14],result[15],result[16],result[17],result[18],result[19],result[20],result[21],result[22],result[23],result[24],result[25],result[26],result[27],result[28],result[29],result[30],result[31],result[32]);
-                
-                
+              //  printf("%d\n",strcmp(cfgdata,temp));
                 
                 if(strcmp(cfgdata,temp)==0)
                 {
+                
                    fprintf(r,"scale length : %d, spawn delay:  %.2lf , reward life: %d. \n\n",sl,rs,rd); 
-                //   printf("configuration found!: scale length : %d, spawn delay:  %.0lf , reward life: %d. \n\n",sl,rs,rd);
+                   printf("configuration found!: scale length : %d, spawn delay:  %.0lf , reward life: %d. \n\n",sl,rs,rd);
                 }
                     
                 
