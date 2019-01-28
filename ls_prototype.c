@@ -309,7 +309,7 @@ main()
     
     rad = atoi(rad_in);
         
-    for(int sl = 10; sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
+    for(int sl = (2*rad); sl<=atoi(scale_in); sl=sl+10 ) //for scale lengths
     {
        
         for(double rs = 0; (rs<sl && rs<=atoi(sp_delay_in)); rs=rs+1) //for 
